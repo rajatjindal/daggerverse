@@ -12,7 +12,6 @@ type Caddy struct {
 }
 
 type ServiceConfig struct {
-	LBDomainName string
 	UpstreamName string
 	UpstreamPort int32
 	UpstreamSvc  *dagger.Service
@@ -24,9 +23,8 @@ func New() *Caddy {
 	}
 }
 
-func (c *Caddy) WithService(ctx context.Context, upstreamService *dagger.Service, lbDomainName, upstreamName string, upstreamPort int32) *Caddy {
+func (c *Caddy) WithService(ctx context.Context, upstreamService *dagger.Service, upstreamName string, upstreamPort int32) *Caddy {
 	c.Services = append(c.Services, &ServiceConfig{
-		LBDomainName: lbDomainName,
 		UpstreamName: upstreamName,
 		UpstreamPort: upstreamPort,
 		UpstreamSvc:  upstreamService,
@@ -39,11 +37,11 @@ func (c *Caddy) GetCaddyFile(ctx context.Context) string {
 	caddyFile := ""
 	for _, svc := range c.Services {
 		caddyFile += fmt.Sprintf(`
-http://%s {
+:%d {
 		reverse_proxy %s:%d
 }
 
-`, svc.LBDomainName, svc.UpstreamName, svc.UpstreamPort)
+`, svc.UpstreamPort, svc.UpstreamName, svc.UpstreamPort)
 	}
 
 	return caddyFile
