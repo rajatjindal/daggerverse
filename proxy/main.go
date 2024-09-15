@@ -50,8 +50,13 @@ http://%s {
 }
 
 func (c *Caddy) Service(ctx context.Context) *dagger.Service {
-	return dag.Container().From("caddy:2.8.4").
+	ctr := dag.Container().From("caddy:2.8.4").
 		WithNewFile("/opt/caddy/caddyfile", c.GetCaddyFile(ctx)).
-		WithExec([]string{"caddy", "run", "--config", "/opt/caddy/caddyfile"}).
-		AsService()
+		WithExec([]string{"caddy", "run", "--config", "/opt/caddy/caddyfile"})
+
+	for _, svc := range c.Services {
+		ctr = ctr.WithServiceBinding(svc.UpstreamName, svc.UpstreamSvc)
+	}
+
+	return ctr.AsService()
 }
