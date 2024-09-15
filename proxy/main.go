@@ -52,14 +52,11 @@ func (c *Caddy) Container(ctx context.Context) *dagger.Container {
 		WithNewFile("/opt/caddy/caddyfile", c.GetCaddyFile(ctx))
 
 	for _, svc := range c.Services {
-		ctr = ctr.WithServiceBinding(svc.UpstreamName, svc.UpstreamSvc)
+		ctr = ctr.WithServiceBinding(svc.UpstreamName, svc.UpstreamSvc).
+			WithExposedPort(int(svc.UpstreamPort))
 	}
 
-	ctr.
-		WithExec([]string{"caddy", "run", "--config", "/opt/caddy/caddyfile"}).
-		WithExposedPort(80)
-
-	return ctr
+	return ctr.WithExec([]string{"caddy", "run", "--config", "/opt/caddy/caddyfile"})
 }
 
 func (c *Caddy) Serve(ctx context.Context) *dagger.Service {
