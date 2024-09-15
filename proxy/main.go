@@ -8,10 +8,10 @@ import (
 )
 
 type Caddy struct {
-	Services []*Service
+	Services []*ServiceConfig
 }
 
-type Service struct {
+type ServiceConfig struct {
 	LBDomainName string
 	UpstreamName string
 	UpstreamPort int32
@@ -20,12 +20,12 @@ type Service struct {
 
 func New() *Caddy {
 	return &Caddy{
-		Services: []*Service{},
+		Services: []*ServiceConfig{},
 	}
 }
 
 func (c *Caddy) WithService(ctx context.Context, upstreamService *dagger.Service, lbDomainName, upstreamName string, upstreamPort int32) *Caddy {
-	c.Services = append(c.Services, &Service{
+	c.Services = append(c.Services, &ServiceConfig{
 		LBDomainName: lbDomainName,
 		UpstreamName: upstreamName,
 		UpstreamPort: upstreamPort,
