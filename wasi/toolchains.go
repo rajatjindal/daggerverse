@@ -9,7 +9,13 @@ import (
 
 func WithRustToolchain(version string) dagger.WithContainerFunc {
 	return func(c *dagger.Container) *dagger.Container {
-		return c
+		return c.
+			WithExec([]string{"sh", "-c", "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"}).
+			WithEnvVariable("PATH", "$PATH:/root/.cargo/bin", dagger.ContainerWithEnvVariableOpts{Expand: true}).
+			WithExec([]string{"rustup", "toolchain", "install", version, "--component=clippy", "--component=rustfmt", "--no-self-update"}).
+			WithExec([]string{"rustup", "default", version}).
+			WithExec([]string{"rustup", "target", "add", "wasm32-wasi"}).
+			WithExec([]string{"rustup", "target", "add", "wasm32-unknown-unknown"})
 	}
 }
 

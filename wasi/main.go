@@ -68,7 +68,7 @@ func (w *Wasi) Base() *dagger.Container {
 	return dag.Container().
 		From(w.BaseImage).
 		WithExec([]string{"apt-get", "update"}).
-		WithExec([]string{"apt-get", "install", "-y", "wget"})
+		WithExec([]string{"apt-get", "install", "-y", "wget", "curl"})
 }
 
 func (w *Wasi) BuildEnv(
