@@ -68,7 +68,7 @@ func (w *Wasi) Base() *dagger.Container {
 	return dag.Container().
 		From(w.BaseImage).
 		WithExec([]string{"apt-get", "update"}).
-		WithExec([]string{"apt-get", "install", "-y", "wget", "curl"})
+		WithExec([]string{"apt-get", "install", "-y", "wget", "curl", "build-essential"})
 }
 
 func (w *Wasi) BuildEnv(
@@ -78,7 +78,7 @@ func (w *Wasi) BuildEnv(
 ) (*dagger.Container, error) {
 	ctr := w.Base().
 		WithWorkdir("/app").
-		WithDirectory("/app", source)
+		WithMountedDirectory("/app", source)
 
 	var toolchains []string
 	projectToolchains, err := ctr.File(".toolchains").Contents(ctx)
@@ -121,13 +121,14 @@ func (w *Wasi) Build(
 	source *dagger.Directory,
 	// +default=[]
 	args []string,
-) (*dagger.Container, error) {
+) (*dagger.Directory, error) {
 	buildctr, err := w.BuildEnv(ctx, source)
 	if err != nil {
 		return nil, err
 	}
-
-	return buildctr.WithExec(append([]string{"spin", "build"}, args...), dagger.ContainerWithExecOpts{Expect: dagger.Any}).Sync(ctx)
+	return buildctr.
+		WithExec(append([]string{"spin", "build"}, args...), dagger.ContainerWithExecOpts{Expect: dagger.Any}).
+		Directory("/app"), nil
 }
 
 func (w *Wasi) RegistryPush(
