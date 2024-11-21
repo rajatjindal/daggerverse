@@ -76,3 +76,17 @@ func WithSpin(version string) dagger.WithContainerFunc {
 			From("ghcr.io/fermyon/spin:canary-distroless").File("/usr/local/bin/spin"))
 	}
 }
+
+func WithNode(version string) dagger.WithContainerFunc {
+	return func(c *dagger.Container) *dagger.Container {
+		return c.
+			WithExec([]string{"wget", "https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh", "-O", "install.sh"}).
+			WithExec([]string{"bash", "install.sh"}).
+			WithEnvVariable("NVM_DIR", "/root/.nvm", dagger.ContainerWithEnvVariableOpts{Expand: true}).
+			WithExec([]string{"sh", "-c", ". /root/.nvm/nvm.sh && nvm --version"}).
+			WithExec([]string{"sh", "-c", fmt.Sprintf(". /root/.nvm/nvm.sh && nvm install %s", version)}).
+			WithExec([]string{"sh", "-c", fmt.Sprintf(". /root/.nvm/nvm.sh && nvm use %s", version)}).
+			WithEnvVariable("PATH", fmt.Sprintf("/root/.nvm/versions/node/v%s/bin:$PATH", version), dagger.ContainerWithEnvVariableOpts{Expand: true}).
+			WithExec([]string{"npm", "install", "-g", "yarn"})
+	}
+}

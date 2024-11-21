@@ -14,6 +14,7 @@ type Wasi struct {
 	RustVersion      string
 	WasmtoolsVersion string
 	SpinVersion      string
+	NodeVersion      string
 }
 
 func New(
@@ -52,6 +53,11 @@ func New(
 	//
 	// +default="3.0.0"
 	spinVersion string,
+
+	// The version of spin to be installed for build env.
+	//
+	// +default="22.11.0"
+	nodeVersion string,
 ) *Wasi {
 	// panic(fmt.Sprintf("inside new %s", wasmtoolsVersion))
 	return &Wasi{
@@ -61,6 +67,7 @@ func New(
 		RustVersion:      rustVersion,
 		WasmtoolsVersion: wasmtoolsVersion,
 		SpinVersion:      spinVersion,
+		NodeVersion:      nodeVersion,
 	}
 }
 
@@ -165,4 +172,6 @@ var withToolchainMap = map[string]func(version string) dagger.WithContainerFunc{
 	"rust":   WithRustToolchain,
 	"tinygo": WithTinyGoToolchain,
 	"spin":   WithSpin,
+	"node":   WithNode,
+	"nodejs": WithNode,
 }
