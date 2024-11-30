@@ -15,6 +15,7 @@ type Wasi struct {
 	WasmtoolsVersion string
 	SpinVersion      string
 	NodeVersion      string
+	DockerCfg        *dagger.Secret
 }
 
 func New(
@@ -58,6 +59,9 @@ func New(
 	//
 	// +default="22.11.0"
 	nodeVersion string,
+
+	// +private
+	dockerCfg *dagger.Secret,
 ) *Wasi {
 	// panic(fmt.Sprintf("inside new %s", wasmtoolsVersion))
 	return &Wasi{
@@ -68,6 +72,7 @@ func New(
 		WasmtoolsVersion: wasmtoolsVersion,
 		SpinVersion:      spinVersion,
 		NodeVersion:      nodeVersion,
+		DockerCfg:        dockerCfg,
 	}
 }
 
@@ -151,6 +156,9 @@ func (w *Wasi) RegistryPush(
 		return nil, err
 	}
 
+	// add docker cfg creds
+	buildctr = w.withDockerCfg(buildctr)
+
 	return buildctr.
 		WithExec(append([]string{"spin", "registry", "push", ociArtifactName}, args...), dagger.ContainerWithExecOpts{Expect: dagger.Any}).
 		Sync(ctx)
@@ -164,6 +172,14 @@ func getToolchainVersion(toolchain, defaultVersion string) (string, string) {
 	parts := strings.Split(toolchain, "=")
 
 	return parts[0], parts[1]
+}
+
+func (w *Wasi) withDockerCfg(ctr *dagger.Container) *dagger.Container {
+	if w.DockerCfg == nil {
+		return ctr
+	}
+
+	return ctr.WithMountedSecret("/root/.docker/config.json", w.DockerCfg)
 }
 
 var withToolchainMap = map[string]func(version string) dagger.WithContainerFunc{
