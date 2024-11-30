@@ -139,8 +139,8 @@ func (w *Wasi) Build(
 		return nil, err
 	}
 	return buildctr.
-		WithExec(append([]string{"spin", "build"}, args...), dagger.ContainerWithExecOpts{Expect: dagger.Any}).
-		Directory("/app"), nil
+		WithExec(append([]string{"spin", "build"}, args...)).
+		Directory("/app").Sync(ctx)
 }
 
 func (w *Wasi) RegistryPush(
@@ -160,7 +160,7 @@ func (w *Wasi) RegistryPush(
 	buildctr = w.withDockerCfg(buildctr)
 
 	return buildctr.
-		WithExec(append([]string{"spin", "registry", "push", ociArtifactName}, args...), dagger.ContainerWithExecOpts{Expect: dagger.Any}).
+		WithExec(append([]string{"spin", "registry", "push", ociArtifactName}, args...)).
 		Sync(ctx)
 }
 
