@@ -159,7 +159,7 @@ func (w *Wasi) RegistryPush(
 	// add docker cfg creds
 	buildctr = w.withDockerCfg(buildctr)
 
-	return buildctr.Terminal().
+	return buildctr.
 		WithExec(append([]string{"spin", "registry", "push", ociArtifactName}, args...)).
 		Sync(ctx)
 }
