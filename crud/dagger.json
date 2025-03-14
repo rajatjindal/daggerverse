@@ -1,0 +1,19 @@
+{
+  "name": "dev",
+  "engineVersion": "v0.16.3",
+  "sdk": {
+    "source": "go"
+  },
+  "dependencies": [
+    {
+      "name": "caddy",
+      "source": "github.com/rajatjindal/daggerverse/caddy@c510d5a8f4de55f33142fca222843701f69752fc",
+      "pin": "c510d5a8f4de55f33142fca222843701f69752fc"
+    },
+    {
+      "name": "go",
+      "source": "github.com/sagikazarmark/daggerverse/go@b917007f0b6e7b71cc9d45c3b41b133f25c52661",
+      "pin": "b917007f0b6e7b71cc9d45c3b41b133f25c52661"
+    }
+  ]
+}

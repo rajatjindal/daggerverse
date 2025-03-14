@@ -1,6 +1,7 @@
 {
   "name": "caddy",
-  "sdk": "go",
-  "source": ".",
-  "engineVersion": "v0.13.0"
+  "engineVersion": "v0.16.3",
+  "sdk": {
+    "source": "go"
+  }
 }
