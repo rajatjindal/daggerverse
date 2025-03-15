@@ -3,32 +3,15 @@ package main
 import (
 	"context"
 	"dagger/dev/internal/dagger"
-	"slices"
 )
 
-type Toolchain struct {
-	Golang   string
-	Postgres string
-}
-
 type Crud struct {
-	Src       *dagger.Directory
-	Toolchain Toolchain
-	oldui     bool
+	Src *dagger.Directory
 }
 
 func New(ctx context.Context, source *dagger.Directory) (*Crud, error) {
 	crud := &Crud{
 		Src: source,
-	}
-
-	entries, err := source.Entries(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	if slices.Contains(entries, "ui-old") {
-		crud.oldui = true
 	}
 
 	return crud, nil
@@ -74,7 +57,7 @@ func (crud *Crud) Serve(ctx context.Context) *dagger.Service {
 		WithService(backend, "backend-pprof", 8081). // pprof
 		WithService(crud.Frontend().Serve(ctx), "frontend", 3000)
 
-	if crud.oldui {
+	if false {
 		caddy = caddy.WithService(crud.FrontendOld().Serve(ctx), "frontend-old", 3001)
 	}
 

@@ -4,10 +4,10 @@ import (
 	"context"
 	"strings"
 
-	"github.com/dagger/dagger-test-modules/dagger/dagger"
+	"dagger/toolchains/internal/dagger"
 )
 
-type Toolchain struct {
+type Toolchains struct {
 	Golang     string
 	Postgresql string
 }
@@ -18,14 +18,14 @@ func New(
 
 	// +default="17.4"
 	postgresql string,
-) *Toolchain {
-	return &Toolchain{
+) *Toolchains {
+	return &Toolchains{
 		Golang:     golang,
 		Postgresql: postgresql,
 	}
 }
 
-func (t *Toolchain) GetRequiredVersions(ctx context.Context, source *dagger.Directory) (map[string]string, error) {
+func (t *Toolchains) GetRequiredVersions(ctx context.Context, source *dagger.Directory) (map[string]string, error) {
 	projectToolchains, err := source.File(".toolchains").Contents(ctx)
 	if err != nil {
 		return nil, err
