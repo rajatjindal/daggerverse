@@ -14,6 +14,11 @@
       "name": "go",
       "source": "github.com/sagikazarmark/daggerverse/go@b917007f0b6e7b71cc9d45c3b41b133f25c52661",
       "pin": "b917007f0b6e7b71cc9d45c3b41b133f25c52661"
+    },
+    {
+      "name": "toolchains",
+      "source": "github.com/rajatjindal/daggerverse/toolchains@main",
+      "pin": "b917007f0b6e7b71cc9d45c3b41b133f25c52661"
     }
   ]
 }

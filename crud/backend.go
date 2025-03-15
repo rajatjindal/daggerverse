@@ -7,7 +7,8 @@ import (
 )
 
 const (
-	goVersion = "1.23.6"
+	goVersion       = "1.23.6"
+	postgresVersion = "17.4"
 )
 
 type Backend struct {
@@ -42,7 +43,7 @@ func (m *Backend) Build(ctx context.Context) *dagger.Container {
 }
 
 func (m *Backend) Database(ctx context.Context) *dagger.Service {
-	return dag.Container().From("postgres:13.3").
+	return dag.Container().From("postgres:17.4").
 		WithEnvVariable("POSTGRES_DB", m.Name).
 		WithEnvVariable("POSTGRES_PASSWORD", "semi-secure-password").
 		WithEnvVariable("POSTGRES_USER", "postgres").

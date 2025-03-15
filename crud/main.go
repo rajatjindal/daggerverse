@@ -6,10 +6,15 @@ import (
 	"slices"
 )
 
-type Crud struct {
-	Src *dagger.Directory
+type Toolchain struct {
+	Golang   string
+	Postgres string
+}
 
-	oldui bool
+type Crud struct {
+	Src       *dagger.Directory
+	Toolchain Toolchain
+	oldui     bool
 }
 
 func New(ctx context.Context, source *dagger.Directory) (*Crud, error) {
