@@ -6,12 +6,14 @@ import (
 )
 
 type Crud struct {
-	Src *dagger.Directory
+	Name string
+	Src  *dagger.Directory
 }
 
-func New(ctx context.Context, source *dagger.Directory) (*Crud, error) {
+func New(ctx context.Context, name string, source *dagger.Directory) (*Crud, error) {
 	crud := &Crud{
-		Src: source,
+		Name: name,
+		Src:  source,
 	}
 
 	return crud, nil
@@ -26,6 +28,7 @@ func (crud *Crud) FrontendOld() *FrontendOld {
 
 func (crud *Crud) Backend() *Backend {
 	return &Backend{
+		Name: crud.Name,
 		Crud: crud,
 		Src:  crud.Src.Directory("backend"),
 	}
