@@ -19,13 +19,14 @@ scrape_configs:
   metrics_path: '/metrics'
   static_configs:
     - targets: ['backend:8081']
-`).
-		WithDefaultArgs([]string{"--config.file=/etc/prometheus/prometheus.yml"}).
-		WithExposedPort(9090)
+`).WithExposedPort(9090)
 }
 
 func (m *Prometheus) Serve(ctx context.Context, backend *dagger.Service) *dagger.Service {
 	return m.Build(ctx).
 		WithServiceBinding("backend", backend).
-		AsService()
+		AsService(dagger.ContainerAsServiceOpts{
+			UseEntrypoint: true,
+			Args:          ([]string{"--config.file=/etc/prometheus/prometheus.yml"}),
+		})
 }

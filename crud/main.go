@@ -59,7 +59,6 @@ func (crud *Crud) Serve(ctx context.Context) *dagger.Service {
 	caddy := dag.Caddy().
 		WithService(backend, "backend", 8080).
 		WithService(backend, "backend-pprof", 8081). // pprof
-
 		WithService(crud.Prometheus().Serve(ctx, backend), "prometheus", 9090)
 
 	if false {
