@@ -5,57 +5,57 @@ import (
 	"dagger/dev/internal/dagger"
 )
 
-type Dev struct {
+type Crud struct {
 	Src *dagger.Directory
 }
 
-func New(ctx context.Context, source *dagger.Directory) (*Dev, error) {
-	dev := &Dev{
+func New(ctx context.Context, source *dagger.Directory) (*Crud, error) {
+	crud := &Crud{
 		Src: source,
 	}
 
-	return dev, nil
+	return crud, nil
 }
 
-func (dev *Dev) FrontendOld() *FrontendOld {
+func (crud *Crud) FrontendOld() *FrontendOld {
 	return &FrontendOld{
-		Dev: dev,
-		Src: dev.Src.Directory("ui-old"),
+		Crud: crud,
+		Src:  crud.Src.Directory("ui-old"),
 	}
 }
 
-func (dev *Dev) Backend() *Backend {
+func (crud *Crud) Backend() *Backend {
 	return &Backend{
-		Dev: dev,
-		Src: dev.Src.Directory("backend"),
+		Crud: crud,
+		Src:  crud.Src.Directory("backend"),
 	}
 }
 
-func (dev *Dev) Frontend() *Frontend {
+func (crud *Crud) Frontend() *Frontend {
 	return &Frontend{
-		Dev: dev,
-		Src: dev.Src.Directory("ui"),
+		Crud: crud,
+		Src:  crud.Src.Directory("ui"),
 	}
 }
 
-func (dev *Dev) Prometheus() *Prometheus {
+func (crud *Crud) Prometheus() *Prometheus {
 	return &Prometheus{
-		Dev: dev,
+		Crud: crud,
 	}
 }
 
-func (dev *Dev) Service(ctx context.Context) *dagger.Service {
-	return dev.FrontendOld().Build(ctx).
+func (crud *Crud) Service(ctx context.Context) *dagger.Service {
+	return crud.FrontendOld().Build(ctx).
 		AsService()
 }
 
-func (dev *Dev) Serve(ctx context.Context) *dagger.Service {
-	backend := dev.Backend().Serve(ctx)
+func (crud *Crud) Serve(ctx context.Context) *dagger.Service {
+	backend := crud.Backend().Serve(ctx)
 
 	return dag.Caddy().
 		WithService(backend, "backend", 8080).
 		WithService(backend, "backend-pprof", 8081). // pprof
-		WithService(dev.FrontendOld().Serve(ctx), "frontend-old", 3001).
-		WithService(dev.Frontend().Serve(ctx), "frontend", 3000).
+		WithService(crud.FrontendOld().Serve(ctx), "frontend-old", 3001).
+		WithService(crud.Frontend().Serve(ctx), "frontend", 3000).
 		Serve()
 }

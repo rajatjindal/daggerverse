@@ -11,8 +11,8 @@ const (
 )
 
 type FrontendOld struct {
-	Dev *Dev
-	Src *dagger.Directory
+	Crud *Crud
+	Src  *dagger.Directory
 }
 
 func (m *FrontendOld) Build(ctx context.Context) *dagger.Container {

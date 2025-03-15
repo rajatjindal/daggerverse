@@ -11,8 +11,8 @@ const (
 )
 
 type Frontend struct {
-	Dev *Dev
-	Src *dagger.Directory
+	Crud *Crud
+	Src  *dagger.Directory
 }
 
 func (m *Frontend) Generate(ctx context.Context) *dagger.Directory {

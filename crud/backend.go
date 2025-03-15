@@ -12,7 +12,7 @@ const (
 
 type Backend struct {
 	Name string
-	Dev  *Dev
+	Crud *Crud
 	Src  *dagger.Directory
 }
 
