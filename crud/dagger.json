@@ -17,8 +17,7 @@
     },
     {
       "name": "toolchains",
-      "source": "github.com/rajatjindal/daggerverse/toolchains@main",
-      "pin": "b917007f0b6e7b71cc9d45c3b41b133f25c52661"
+      "source": "github.com/rajatjindal/daggerverse/toolchains@main"
     }
   ]
 }
