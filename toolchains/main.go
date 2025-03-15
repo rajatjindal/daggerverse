@@ -2,9 +2,8 @@ package main
 
 import (
 	"context"
-	"strings"
-
 	"dagger/toolchains/internal/dagger"
+	"strings"
 )
 
 type Toolchains struct {
@@ -25,20 +24,24 @@ func New(
 	}
 }
 
-func (t *Toolchains) GetRequiredVersions(ctx context.Context, source *dagger.Directory) (map[string]string, error) {
+func (t *Toolchains) InitRequiredVersions(ctx context.Context, source *dagger.Directory) (*Toolchains, error) {
 	projectToolchains, err := source.File(".toolchains").Contents(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	output := map[string]string{}
 	toolchains := strings.Split(projectToolchains, "\n")
 	for _, toolchain := range toolchains {
 		name, version := getToolchainVersion(toolchain, t.Golang)
-		output[name] = version
+		switch name {
+		case "golang", "go":
+			t.Golang = version
+		case "postgres", "postgresql":
+			t.Postgresql = version
+		}
 	}
 
-	return output, nil
+	return t, nil
 }
 
 func getToolchainVersion(toolchain, defaultVersion string) (string, string) {
