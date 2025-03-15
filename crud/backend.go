@@ -6,11 +6,6 @@ import (
 	"fmt"
 )
 
-const (
-	goVersion       = "1.23.6"
-	postgresVersion = "17.4"
-)
-
 type Backend struct {
 	Name string
 	Crud *Crud
@@ -23,12 +18,30 @@ func withLocalAuth() dagger.WithContainerFunc {
 	}
 }
 
+func (m *Backend) GolangVersion(ctx context.Context) string {
+	version, err := dag.Toolchains().InitRequiredVersions(m.Src).Golang(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	return version
+}
+
+func (m *Backend) PostgresqlVersion(ctx context.Context) string {
+	version, err := dag.Toolchains().InitRequiredVersions(m.Src).Postgresql(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	return version
+}
+
 func (m *Backend) Build(ctx context.Context) *dagger.Container {
 	binary := dag.Go(dagger.GoOpts{
-		Version: goVersion,
+		Version: m.GolangVersion(ctx),
 		Container: dag.
 			Container().
-			From(fmt.Sprintf("golang:%s-alpine", goVersion))},
+			From(fmt.Sprintf("golang:%s-alpine", m.GolangVersion(ctx)))},
 	).
 		Build(m.Src).
 		WithName(m.Name)
@@ -43,7 +56,7 @@ func (m *Backend) Build(ctx context.Context) *dagger.Container {
 }
 
 func (m *Backend) Database(ctx context.Context) *dagger.Service {
-	return dag.Container().From("postgres:17.4").
+	return dag.Container().From(fmt.Sprintf("postgres:%s", m.PostgresqlVersion(ctx))).
 		WithEnvVariable("POSTGRES_DB", m.Name).
 		WithEnvVariable("POSTGRES_PASSWORD", "semi-secure-password").
 		WithEnvVariable("POSTGRES_USER", "postgres").
