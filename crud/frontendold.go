@@ -25,10 +25,11 @@ func (m *FrontendOld) Build(ctx context.Context) *dagger.Container {
 		WithExec([]string{"sh", "-c", `sed -i "s/import nanoid from 'nanoid'/import { nanoid } from 'nanoid'/g" node_modules/@nuxtjs/auth/lib/schemes/oauth2.js`}).
 		WithExec([]string{"yarn", "generate", "--dotenv", ".env.local"}).
 		WithExec([]string{"yarn", "add", "serve"}).
-		WithExposedPort(3001).
-		WithExec([]string{"npx", "serve", "dist", "--debug", "--cors", "--no-port-switching", "-l", "3001"})
+		WithExposedPort(3001)
 }
 
 func (m *FrontendOld) Serve(ctx context.Context) *dagger.Service {
-	return m.Build(ctx).AsService()
+	return m.Build(ctx).AsService(dagger.ContainerAsServiceOpts{
+		Args: []string{"npx", "serve", ".", "--debug", "--cors", "--no-port-switching", "-l", "3001"}},
+	)
 }

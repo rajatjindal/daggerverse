@@ -59,10 +59,10 @@ func (crud *Crud) Serve(ctx context.Context) *dagger.Service {
 	caddy := dag.Caddy().
 		WithService(backend, "backend", 8080).
 		WithService(backend, "backend-pprof", 8081). // pprof
-		WithService(crud.Prometheus().Serve(ctx, backend), "prometheus", 9090)
+		WithService(crud.Prometheus().Serve(ctx, backend), "prometheus", 9090).
+		WithService(crud.Frontend().Serve(ctx), "frontend", 3000)
 
 	if false {
-		caddy = caddy.WithService(crud.Frontend().Serve(ctx), "frontend", 3000)
 		caddy = caddy.WithService(crud.FrontendOld().Serve(ctx), "frontend-old", 3001)
 	}
 
