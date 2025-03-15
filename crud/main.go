@@ -3,15 +3,27 @@ package main
 import (
 	"context"
 	"dagger/dev/internal/dagger"
+	"slices"
 )
 
 type Crud struct {
 	Src *dagger.Directory
+
+	oldui bool
 }
 
 func New(ctx context.Context, source *dagger.Directory) (*Crud, error) {
 	crud := &Crud{
 		Src: source,
+	}
+
+	entries, err := source.Entries(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if slices.Contains(entries, "ui-old") {
+		crud.oldui = true
 	}
 
 	return crud, nil
@@ -52,10 +64,14 @@ func (crud *Crud) Service(ctx context.Context) *dagger.Service {
 func (crud *Crud) Serve(ctx context.Context) *dagger.Service {
 	backend := crud.Backend().Serve(ctx)
 
-	return dag.Caddy().
+	caddy := dag.Caddy().
 		WithService(backend, "backend", 8080).
 		WithService(backend, "backend-pprof", 8081). // pprof
-		WithService(crud.FrontendOld().Serve(ctx), "frontend-old", 3001).
-		WithService(crud.Frontend().Serve(ctx), "frontend", 3000).
-		Serve()
+		WithService(crud.Frontend().Serve(ctx), "frontend", 3000)
+
+	if crud.oldui {
+		caddy = caddy.WithService(crud.FrontendOld().Serve(ctx), "frontend-old", 3001)
+	}
+
+	return caddy.Serve()
 }
