@@ -6,14 +6,16 @@ import (
 )
 
 type Crud struct {
-	Name string
-	Src  *dagger.Directory
+	Name          string
+	SSHAuthSocket *dagger.Socket
+	Src           *dagger.Directory
 }
 
-func New(ctx context.Context, name string, source *dagger.Directory) (*Crud, error) {
+func New(ctx context.Context, name string, socket *dagger.Socket, source *dagger.Directory) (*Crud, error) {
 	crud := &Crud{
-		Name: name,
-		Src:  source,
+		Name:          name,
+		SSHAuthSocket: socket,
+		Src:           source,
 	}
 
 	return crud, nil
@@ -28,7 +30,6 @@ func (crud *Crud) FrontendOld() *FrontendOld {
 
 func (crud *Crud) Backend() *Backend {
 	return &Backend{
-		Name: crud.Name,
 		Crud: crud,
 		Src:  crud.Src.Directory("backend"),
 	}

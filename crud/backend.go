@@ -7,7 +7,6 @@ import (
 )
 
 type Backend struct {
-	Name string
 	Crud *Crud
 	Src  *dagger.Directory
 }
@@ -38,26 +37,33 @@ func (m *Backend) PostgresqlVersion(ctx context.Context) string {
 
 func (m *Backend) Build(ctx context.Context) *dagger.Container {
 	binary := dag.Go(dagger.GoOpts{
-		Version: m.GolangVersion(ctx),
+		Version:      m.GolangVersion(ctx),
+		DisableCache: true,
 		Container: dag.
 			Container().
-			From(fmt.Sprintf("golang:%s-alpine", m.GolangVersion(ctx)))},
+			From(fmt.Sprintf("golang:%s-alpine", m.GolangVersion(ctx))).
+			WithExec([]string{"apk", "add", "git", "openssh"}).
+			WithEnvVariable("GOPRIVATE", "github.com/rajatjindal/crud").
+			WithExec([]string{"sh", "-c", `git config --global url.ssh://git@github.com/.insteadOf https://github.com/`}).
+			WithEnvVariable("GIT_SSH_COMMAND", "ssh -o StrictHostKeyChecking=no ").
+			WithUnixSocket("/tmp/ssh-auth-sock", m.Crud.SSHAuthSocket).
+			WithEnvVariable("SSH_AUTH_SOCK", "/tmp/ssh-auth-sock")},
 	).
 		Build(m.Src).
-		WithName(m.Name)
+		WithName(m.Crud.Name)
 
 	return dag.Container().
 		From("alpine:latest").
 		WithEnvVariable("GODEBUG", "gctrace=1").
-		WithFile(fmt.Sprintf("/usr/local/bin/%s", m.Name), binary).
-		WithEntrypoint([]string{fmt.Sprintf("/usr/local/bin/%s", m.Name)}).
+		WithFile(fmt.Sprintf("/usr/local/bin/%s", m.Crud.Name), binary).
+		WithEntrypoint([]string{fmt.Sprintf("/usr/local/bin/%s", m.Crud.Name)}).
 		WithExposedPort(8080).
 		WithExposedPort(8081)
 }
 
 func (m *Backend) Database(ctx context.Context) *dagger.Service {
 	return dag.Container().From(fmt.Sprintf("postgres:%s", m.PostgresqlVersion(ctx))).
-		WithEnvVariable("POSTGRES_DB", m.Name).
+		WithEnvVariable("POSTGRES_DB", m.Crud.Name).
 		WithEnvVariable("POSTGRES_PASSWORD", "semi-secure-password").
 		WithEnvVariable("POSTGRES_USER", "postgres").
 		WithEnvVariable("PGDATA", "/data/postgresql/pgdata2").

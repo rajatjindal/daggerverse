@@ -2,10 +2,7 @@
   "name": "crud",
   "engineVersion": "v0.16.3",
   "sdk": {
-    "source": "go",
-    "config": {
-      "goprivate": "github.com/rajatjindal/crud"
-    }
+    "source": "go"
   },
   "dependencies": [
     {
