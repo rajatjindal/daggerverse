@@ -62,6 +62,10 @@ func (m *Backend) Build(ctx context.Context) *dagger.Container {
 }
 
 func (m *Backend) Database(ctx context.Context) *dagger.Service {
+	if m.Crud.Database != nil {
+		return m.Crud.Database
+	}
+
 	return dag.Container().From(fmt.Sprintf("postgres:%s", m.PostgresqlVersion(ctx))).
 		WithEnvVariable("POSTGRES_DB", m.Crud.Name).
 		WithEnvVariable("POSTGRES_PASSWORD", "semi-secure-password").

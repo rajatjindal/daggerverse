@@ -8,13 +8,15 @@ import (
 type Crud struct {
 	Name          string
 	SSHAuthSocket *dagger.Socket
+	Database      *dagger.Service
 	Src           *dagger.Directory
 }
 
-func New(ctx context.Context, name string, socket *dagger.Socket, source *dagger.Directory) (*Crud, error) {
+func New(ctx context.Context, name string, socket *dagger.Socket, db *dagger.Service, source *dagger.Directory) (*Crud, error) {
 	crud := &Crud{
 		Name:          name,
 		SSHAuthSocket: socket,
+		Database:      db,
 		Src:           source,
 	}
 
