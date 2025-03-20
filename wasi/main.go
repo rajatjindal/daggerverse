@@ -60,7 +60,7 @@ func New(
 	// +default="22.11.0"
 	nodeVersion string,
 
-	// +private
+	// +optional
 	dockerCfg *dagger.Secret,
 ) *Wasi {
 	// panic(fmt.Sprintf("inside new %s", wasmtoolsVersion))
