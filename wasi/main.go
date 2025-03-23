@@ -183,11 +183,13 @@ func (w *Wasi) withDockerCfg(ctr *dagger.Container) *dagger.Container {
 }
 
 var withToolchainMap = map[string]func(version string) dagger.WithContainerFunc{
-	"go":     WithGoToolchain,
-	"golang": WithGoToolchain,
-	"rust":   WithRustToolchain,
-	"tinygo": WithTinyGoToolchain,
-	"spin":   WithSpin,
-	"node":   WithNode,
-	"nodejs": WithNode,
+	"go":         WithGoToolchain,
+	"golang":     WithGoToolchain,
+	"rust":       WithRustToolchain,
+	"tinygo":     WithTinyGoToolchain,
+	"spin":       WithSpin,
+	"node":       WithNode,
+	"nodejs":     WithNode,
+	"wasmtools":  WithWasmTools,
+	"wasm-tools": WithWasmTools,
 }
