@@ -88,9 +88,11 @@ func (w *Wasi) BuildEnv(
 	// +defaultPath="/"
 	source *dagger.Directory,
 ) (*dagger.Container, error) {
+	// only mount .toolchains file to cache the installation of
+	// the toolchains.
 	ctr := w.Base().
 		WithWorkdir("/app").
-		WithMountedDirectory("/app", source)
+		WithFile(".toolchains", source.File(".toolchains"))
 
 	var toolchains []string
 	projectToolchains, err := ctr.File(".toolchains").Contents(ctx)
@@ -122,8 +124,8 @@ func (w *Wasi) BuildEnv(
 		ctr = ctr.With(WithSpin(w.SpinVersion))
 	}
 
-	// change workdir back to /app
-	ctr = ctr.WithWorkdir("/app")
+	// change workdir back to /app and actually mount the complete source code
+	ctr = ctr.WithWorkdir("/app").WithMountedDirectory("/app", source)
 	return ctr, nil
 }
 
@@ -141,6 +143,27 @@ func (w *Wasi) Build(
 	return buildctr.
 		WithExec(append([]string{"spin", "build"}, args...)).
 		Directory("/app").Sync(ctx)
+}
+
+func (w *Wasi) Up(
+	ctx context.Context,
+	// +defaultPath="/"
+	source *dagger.Directory,
+	// +default=[]
+	args []string,
+) (*dagger.Service, error) {
+	buildctr, err := w.BuildEnv(ctx, source)
+	if err != nil {
+		return nil, err
+	}
+	return buildctr.
+		WithExec(append([]string{"spin", "build"}, args...)).
+		WithExposedPort(3000).
+		AsService(dagger.ContainerAsServiceOpts{
+			Args:          append([]string{"spin", "up", "--listen=0.0.0.0:3000"}, args...),
+			UseEntrypoint: false,
+			NoInit:        true,
+		}), nil
 }
 
 func (w *Wasi) RegistryPush(
