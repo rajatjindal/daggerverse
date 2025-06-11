@@ -135,14 +135,15 @@ func (w *Wasi) Build(
 	source *dagger.Directory,
 	// +default=[]
 	args []string,
-) (*dagger.Directory, error) {
+) (*dagger.Container, error) {
 	buildctr, err := w.BuildEnv(ctx, source)
 	if err != nil {
 		return nil, err
 	}
 	return buildctr.
 		WithExec(append([]string{"spin", "build"}, args...)).
-		Directory("/app").Sync(ctx)
+		WithExposedPort(3000).
+		Sync(ctx)
 }
 
 func (w *Wasi) Up(
