@@ -125,7 +125,8 @@ func (w *Wasi) BuildEnv(
 	}
 
 	// change workdir back to /app and actually mount the complete source code
-	ctr = ctr.WithWorkdir("/app").WithMountedDirectory("/app", source)
+	ctr = ctr.WithWorkdir("/app").
+		WithMountedDirectory("/app", source)
 	return ctr, nil
 }
 
@@ -141,7 +142,9 @@ func (w *Wasi) Build(
 		return nil, err
 	}
 	return buildctr.
-		WithExec(append([]string{"spin", "build"}, args...)).
+		WithExec(append([]string{"spin", "build"}, args...), dagger.ContainerWithExecOpts{
+			Expand: true,
+		}).
 		WithExposedPort(3000).
 		Sync(ctx)
 }
@@ -158,7 +161,9 @@ func (w *Wasi) Up(
 		return nil, err
 	}
 	return buildctr.
-		WithExec(append([]string{"spin", "build"}, args...)).
+		WithExec(append([]string{"spin", "build"}, args...), dagger.ContainerWithExecOpts{
+			Expand: true,
+		}).
 		WithExposedPort(3000).
 		AsService(dagger.ContainerAsServiceOpts{
 			Args:          append([]string{"spin", "up", "--listen=0.0.0.0:3000"}, args...),
