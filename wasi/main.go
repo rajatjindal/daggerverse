@@ -142,7 +142,7 @@ func (w *Wasi) Build(
 		return nil, err
 	}
 	return buildctr.
-		WithExec(append([]string{"spin", "build"}, args...), dagger.ContainerWithExecOpts{
+		WithExec(append([]string{"sh", "-c", "spin build"}, args...), dagger.ContainerWithExecOpts{
 			Expand: true,
 		}).
 		WithExposedPort(3000).
@@ -161,7 +161,7 @@ func (w *Wasi) Up(
 		return nil, err
 	}
 	return buildctr.
-		WithExec(append([]string{"spin", "build"}, args...), dagger.ContainerWithExecOpts{
+		WithExec(append([]string{"sh", "-c", "spin build"}, args...), dagger.ContainerWithExecOpts{
 			Expand: true,
 		}).
 		WithExposedPort(3000).
