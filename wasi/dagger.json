@@ -1,6 +1,6 @@
 {
   "name": "wasi",
-  "engineVersion": "v0.16.3",
+  "engineVersion": "v0.18.10",
   "sdk": {
     "source": "go"
   }
