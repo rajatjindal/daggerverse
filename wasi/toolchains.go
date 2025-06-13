@@ -30,7 +30,13 @@ func WithGoToolchain(version string) dagger.WithContainerFunc {
 			WithExec([]string{"tar", "-C", "/usr/local", "-xvf", releaseArtifactTarFile}).
 			WithEnvVariable("PATH", "/usr/local/go/bin:$PATH", dagger.ContainerWithEnvVariableOpts{
 				Expand: true,
-			})
+			}).
+			// TO GET WIT FILES
+			WithDirectory("/tmp/really-tmp", dag.Directory()).
+			WithWorkdir("/tmp/really-tmp").
+			WithExec([]string{"go", "mod", "init", "really-tmp"}).
+			WithExec([]string{"go", "get", "-u", "github.com/spinframework/spin-go-sdk/v2@wasip2"}).
+			WithoutDirectory("/tmp/really-tmp")
 	}
 }
 

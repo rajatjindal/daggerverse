@@ -28,26 +28,26 @@ func New(
 	//
 	// This version should be compatible with the tinygo version used.
 	//
-	// +default="1.23.2"
+	// +default="1.23.6"
 	golangVersion string,
 
 	// The tinygo version to be installed for the build env.
 	//
 	// This version should be compatible with the golang version used.
 	//
-	// +default="0.34.0"
+	// +default="0.37.0"
 	tinygoVersion string,
 
 	// The rust version to be installed for the build env.
 	//
-	// +default="1.82.0"
+	// +default="1.86.0"
 	rustVersion string,
 
 	// The version of wasm-tools to be installed for build env.
 	//
 	// This is required when developing the golang based app.
 	//
-	// +default="1.220.0"
+	// +default="1.229.0"
 	wasmtoolsVersion string,
 
 	// The version of spin to be installed for build env.
@@ -100,16 +100,18 @@ func (w *Wasi) BuildEnv(
 		toolchains = strings.Split(projectToolchains, "\n")
 	}
 
-	// change workdir to /tmp while we install toolchains
-	ctr = ctr.WithWorkdir("/tmp/")
-
 	var installedToolchains = map[string]string{}
 	for _, toolchain := range toolchains {
 		if toolchain == "" {
 			continue
 		}
 
-		name, version := getToolchainVersion(toolchain, w.GolangVersion)
+		// change workdir to /tmp while we install toolchains
+		// doing inside loop so that if any toolchain installation
+		// changed the dir, we can ensure that we always start from /tmp
+		ctr = ctr.WithWorkdir("/tmp/")
+
+		name, version := getToolchainVersion(toolchain, w.getDefaultVersion(toolchain))
 		withFunc, exists := withToolchainMap[name]
 		if !exists {
 			return nil, fmt.Errorf("unknown toolchain requested %q", name)
@@ -142,7 +144,9 @@ func (w *Wasi) Build(
 		return nil, err
 	}
 	return buildctr.
-		WithExec(append([]string{"sh", "-c", "spin build"}, args...)).
+		WithExec(append([]string{"spin", "build"}, args...), dagger.ContainerWithExecOpts{
+			Expand: true,
+		}).
 		WithExposedPort(3000).
 		Sync(ctx)
 }
@@ -158,10 +162,8 @@ func (w *Wasi) Up(
 	if err != nil {
 		return nil, err
 	}
+
 	return buildctr.
-		WithExec(append([]string{"sh", "-c", "spin build"}, args...), dagger.ContainerWithExecOpts{
-			Expand: true,
-		}).
 		WithExposedPort(3000).
 		AsService(dagger.ContainerAsServiceOpts{
 			Args:          append([]string{"spin", "up", "--listen=0.0.0.0:3000"}, args...),
@@ -219,4 +221,23 @@ var withToolchainMap = map[string]func(version string) dagger.WithContainerFunc{
 	"nodejs":     WithNode,
 	"wasmtools":  WithWasmTools,
 	"wasm-tools": WithWasmTools,
+}
+
+func (w *Wasi) getDefaultVersion(toolchain string) string {
+	switch toolchain {
+	case "go", "golang":
+		return w.GolangVersion
+	case "tinygo":
+		return w.TinygoVersion
+	case "rust":
+		return w.RustVersion
+	case "spin":
+		return w.SpinVersion
+	case "nodejs", "node":
+		return w.NodeVersion
+	case "wasmtools", "wasm-tools":
+		return w.WasmtoolsVersion
+	}
+
+	return ""
 }
