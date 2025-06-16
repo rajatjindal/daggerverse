@@ -15,7 +15,9 @@ func WithRustToolchain(version string) dagger.WithContainerFunc {
 			WithExec([]string{"rustup", "toolchain", "install", version, "--component=clippy", "--component=rustfmt", "--no-self-update"}).
 			WithExec([]string{"rustup", "default", version}).
 			WithExec([]string{"rustup", "target", "add", "wasm32-wasip1"}).
-			WithExec([]string{"rustup", "target", "add", "wasm32-unknown-unknown"})
+			WithExec([]string{"rustup", "target", "add", "wasm32-unknown-unknown"}).
+			WithMountedCache("/root/.cargo/registry", dag.CacheVolume("cargo-registry")).
+			WithMountedCache("/root/.cargo/git", dag.CacheVolume("cargo-git"))
 	}
 }
 
@@ -31,6 +33,9 @@ func WithGoToolchain(version string) dagger.WithContainerFunc {
 			WithEnvVariable("PATH", "/usr/local/go/bin:$PATH", dagger.ContainerWithEnvVariableOpts{
 				Expand: true,
 			}).
+			// cache go build/mod stuff
+			WithMountedCache("/go/pkg/mod", dag.CacheVolume("go-mod")).
+			WithMountedCache("/root/.cache/go-build", dag.CacheVolume("go-build")).
 			// TO GET WIT FILES
 			WithDirectory("/tmp/really-tmp", dag.Directory()).
 			WithWorkdir("/tmp/really-tmp").

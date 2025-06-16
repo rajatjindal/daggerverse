@@ -83,7 +83,7 @@ func (w *Wasi) Base() *dagger.Container {
 		WithExec([]string{"apt-get", "install", "-y", "wget", "curl", "build-essential"})
 }
 
-func (w *Wasi) BuildEnvCtr(
+func (w *Wasi) BuildEnv(
 	ctx context.Context,
 	// +defaultPath="/"
 	source *dagger.Directory,
@@ -139,7 +139,7 @@ func (w *Wasi) Build(
 	// +default=[]
 	args []string,
 ) (*dagger.Container, error) {
-	buildctr, err := w.BuildEnvCtr(ctx, source)
+	buildctr, err := w.BuildEnv(ctx, source)
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +158,7 @@ func (w *Wasi) Up(
 	// +default=[]
 	args []string,
 ) (*dagger.Service, error) {
-	buildctr, err := w.BuildEnvCtr(ctx, source)
+	buildctr, err := w.BuildEnv(ctx, source)
 	if err != nil {
 		return nil, err
 	}
@@ -171,93 +171,6 @@ func (w *Wasi) Up(
 			NoInit:        true,
 		}), nil
 }
-
-// func (w *Wasi) BuildEnv(
-// 	ctx context.Context,
-// 	// +defaultPath="/"
-// 	source *dagger.Directory,
-// ) (string, error) {
-// 	ctr, err := w.BuildEnvCtr(ctx, source)
-// 	if err != nil {
-// 		return "", err
-// 	}
-
-// 	id, err := dag.Env().WithContainerInput("buildenv", ctr, "spin build container)").ID(ctx)
-// 	if err != nil {
-// 		return "", err
-// 	}
-
-// 	return string(id), nil
-// }
-//
-// func (w *Wasi) BuildInCtr(
-// 	ctx context.Context,
-// 	envId string,
-// 	// +default=[]
-// 	args []string,
-// ) (string, error) {
-// 	ctr := dag.LoadEnvFromID(dagger.EnvID(envId)).Input("buildenv").AsContainer()
-
-// 	ctr, err := ctr.
-// 		WithExec(append([]string{"spin", "build"}, args...), dagger.ContainerWithExecOpts{
-// 			Expand: true,
-// 		}).
-// 		WithExposedPort(3000).
-// 		Sync(ctx)
-
-// 	if err != nil {
-// 		return "", err
-// 	}
-
-// 	id, err := dag.Env().WithContainerInput("buildenv", ctr, "").ID(ctx)
-// 	return string(id), err
-// }
-
-// func (w *Wasi) UpInCtr(
-// 	ctx context.Context,
-// 	envId string,
-// 	// +default=[]
-// 	args []string,
-// ) (*dagger.Service, error) {
-// 	ctr := dag.LoadEnvFromID(dagger.EnvID(envId)).Input("buildenv").AsContainer()
-
-// 	return ctr.
-// 		WithExposedPort(3000).
-// 		AsService(dagger.ContainerAsServiceOpts{
-// 			Args:          append([]string{"spin", "up", "--listen=0.0.0.0:3000"}, args...),
-// 			UseEntrypoint: false,
-// 			NoInit:        true,
-// 		}), nil
-// }
-
-// func (w *Wasi) GetAppDirInCtr(
-// 	ctx context.Context,
-// 	envId string,
-// ) (*dagger.Directory, error) {
-// 	ctr := dag.LoadEnvFromID(dagger.EnvID(envId)).Input("buildenv").AsContainer()
-// 	return ctr.Directory("/app"), nil
-// }
-//
-// func (w *Wasi) RegistryPush(
-// 	ctx context.Context,
-// 	// +defaultPath="/"
-// 	source *dagger.Directory,
-// 	ociArtifactName string,
-// 	// +default=[]
-// 	args []string,
-// ) (*dagger.Container, error) {
-// 	buildctr, err := w.BuildEnv(ctx, source)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	// add docker cfg creds
-// 	buildctr = w.withDockerCfg(buildctr)
-
-// 	return buildctr.
-// 		WithExec(append([]string{"spin", "registry", "push", ociArtifactName}, args...)).
-// 		Sync(ctx)
-// }
 
 func getToolchainVersion(toolchain, defaultVersion string) (string, string) {
 	if !strings.Contains(toolchain, "=") {
@@ -306,10 +219,4 @@ func (w *Wasi) getDefaultVersion(toolchain string) string {
 	}
 
 	return ""
-}
-
-func getContainerId(input string) string {
-	// return base64.StdEncoding.EncodeToString([]byte(input))
-	// return base64.StdEncoding.EncodeToString([]byte(strings.TrimPrefix(input, "Container@")))
-	return input
 }
