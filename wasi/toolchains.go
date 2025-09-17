@@ -40,7 +40,7 @@ func WithGoToolchain(version string) dagger.WithContainerFunc {
 			WithDirectory("/tmp/really-tmp", dag.Directory()).
 			WithWorkdir("/tmp/really-tmp").
 			WithExec([]string{"go", "mod", "init", "really-tmp"}).
-			WithExec([]string{"go", "get", "-u", "github.com/spinframework/spin-go-sdk/v2@wasip2"}).
+			WithExec([]string{"go", "get", "-u", "github.com/spinframework/spin-go-sdk/v3@wasip2"}).
 			WithoutDirectory("/tmp/really-tmp")
 	}
 }
